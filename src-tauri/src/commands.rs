@@ -8,7 +8,7 @@ use crate::hasher::{extract_hash_errors, extract_successful_hashes, hash_files_p
 use crate::scanner::{group_by_size, scan_directories};
 use crate::state::AppState;
 use crate::types::{
-    DeleteError, DeleteResult, DuplicateGroup, ScanError, ScanOptions, ScanPhase, ScanProgress,
+    DeleteError, DeleteResult, ScanError, ScanOptions, ScanPhase, ScanProgress,
     ScanResult,
 };
 use log::{debug, error, info, warn};
@@ -249,14 +249,18 @@ pub async fn delete_files(file_paths: Vec<String>, use_trash: bool) -> Result<De
 pub async fn select_folders(app_handle: AppHandle) -> Result<Vec<String>, String> {
     use tauri_plugin_dialog::DialogExt;
 
-    let result = app_handle
+    let (tx, rx) = tokio::sync::oneshot::channel();
+
+    app_handle
         .dialog()
         .file()
         .set_title("Select Folders to Scan")
-        .pick_folders();
+        .pick_folders(move |paths| {
+            let _ = tx.send(paths);
+        });
 
-    match result {
-        Some(paths) => {
+    match rx.await {
+        Ok(Some(paths)) => {
             let path_strings: Vec<String> = paths
                 .into_iter()
                 .map(|p| p.to_string())
@@ -265,9 +269,12 @@ pub async fn select_folders(app_handle: AppHandle) -> Result<Vec<String>, String
             info!("Selected {} folders", path_strings.len());
             Ok(path_strings)
         }
-        None => {
+        Ok(None) => {
             debug!("Folder selection cancelled");
             Ok(Vec::new())
+        }
+        Err(_) => {
+            Err("Dialog channel closed unexpectedly".to_string())
         }
     }
 }

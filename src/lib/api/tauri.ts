@@ -10,9 +10,6 @@ import type {
   DeleteResult,
 } from '../types';
 
-// Check if we're running in Tauri
-const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
-
 type UnlistenFn = () => void;
 
 // Event names matching the Rust backend
@@ -23,24 +20,30 @@ const EVENTS = {
   SCAN_CANCELLED: 'scan_cancelled',
 } as const;
 
-// Dynamically import Tauri APIs only when available
-let tauriInvoke: typeof import('@tauri-apps/api/core').invoke | undefined;
-let tauriListen: typeof import('@tauri-apps/api/event').listen | undefined;
+// Check if we're running in Tauri v2 context
+function isTauriContext(): boolean {
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+}
 
-if (isTauri) {
-  import('@tauri-apps/api/core').then((mod) => {
-    tauriInvoke = mod.invoke;
-  });
-  import('@tauri-apps/api/event').then((mod) => {
-    tauriListen = mod.listen;
-  });
+// Lazily load Tauri APIs
+async function getTauriInvoke() {
+  if (!isTauriContext()) return undefined;
+  const { invoke } = await import('@tauri-apps/api/core');
+  return invoke;
+}
+
+async function getTauriListen() {
+  if (!isTauriContext()) return undefined;
+  const { listen } = await import('@tauri-apps/api/event');
+  return listen;
 }
 
 /**
  * Starts a duplicate file scan with the given options.
  */
 export async function startScan(options: ScanOptions): Promise<ScanResult> {
-  if (!isTauri || !tauriInvoke) {
+  const invoke = await getTauriInvoke();
+  if (!invoke) {
     console.log('[Mock] startScan called');
     return {
       duplicateGroups: [],
@@ -51,18 +54,19 @@ export async function startScan(options: ScanOptions): Promise<ScanResult> {
       durationMs: 0,
     };
   }
-  return tauriInvoke<ScanResult>('start_scan', { options });
+  return invoke<ScanResult>('start_scan', { options });
 }
 
 /**
  * Cancels the currently running scan.
  */
 export async function cancelScan(): Promise<void> {
-  if (!isTauri || !tauriInvoke) {
+  const invoke = await getTauriInvoke();
+  if (!invoke) {
     console.log('[Mock] cancelScan called');
     return;
   }
-  return tauriInvoke('cancel_scan');
+  return invoke('cancel_scan');
 }
 
 /**
@@ -74,22 +78,24 @@ export async function deleteFiles(
   filePaths: string[],
   useTrash: boolean
 ): Promise<DeleteResult> {
-  if (!isTauri || !tauriInvoke) {
+  const invoke = await getTauriInvoke();
+  if (!invoke) {
     console.log('[Mock] deleteFiles called');
     return { deleted: [], failed: [] };
   }
-  return tauriInvoke<DeleteResult>('delete_files', { filePaths, useTrash });
+  return invoke<DeleteResult>('delete_files', { filePaths, useTrash });
 }
 
 /**
  * Opens a folder selection dialog and returns the selected paths.
  */
 export async function selectFolders(): Promise<string[]> {
-  if (!isTauri || !tauriInvoke) {
+  const invoke = await getTauriInvoke();
+  if (!invoke) {
     console.log('[Mock] selectFolders called');
     return ['/mock/test/folder'];
   }
-  return tauriInvoke<string[]>('select_folders');
+  return invoke<string[]>('select_folders');
 }
 
 /**
@@ -99,10 +105,11 @@ export async function selectFolders(): Promise<string[]> {
 export async function onScanProgress(
   callback: (progress: ScanProgress) => void
 ): Promise<UnlistenFn> {
-  if (!isTauri || !tauriListen) {
+  const listen = await getTauriListen();
+  if (!listen) {
     return () => {};
   }
-  return tauriListen<ScanProgress>(EVENTS.SCAN_PROGRESS, (event) => {
+  return listen<ScanProgress>(EVENTS.SCAN_PROGRESS, (event) => {
     callback(event.payload);
   });
 }
@@ -114,10 +121,11 @@ export async function onScanProgress(
 export async function onScanFinished(
   callback: (result: ScanResult) => void
 ): Promise<UnlistenFn> {
-  if (!isTauri || !tauriListen) {
+  const listen = await getTauriListen();
+  if (!listen) {
     return () => {};
   }
-  return tauriListen<ScanResult>(EVENTS.SCAN_FINISHED, (event) => {
+  return listen<ScanResult>(EVENTS.SCAN_FINISHED, (event) => {
     callback(event.payload);
   });
 }
@@ -129,10 +137,11 @@ export async function onScanFinished(
 export async function onScanError(
   callback: (error: string) => void
 ): Promise<UnlistenFn> {
-  if (!isTauri || !tauriListen) {
+  const listen = await getTauriListen();
+  if (!listen) {
     return () => {};
   }
-  return tauriListen<string>(EVENTS.SCAN_ERROR, (event) => {
+  return listen<string>(EVENTS.SCAN_ERROR, (event) => {
     callback(event.payload);
   });
 }
@@ -144,10 +153,11 @@ export async function onScanError(
 export async function onScanCancelled(
   callback: () => void
 ): Promise<UnlistenFn> {
-  if (!isTauri || !tauriListen) {
+  const listen = await getTauriListen();
+  if (!listen) {
     return () => {};
   }
-  return tauriListen(EVENTS.SCAN_CANCELLED, () => {
+  return listen(EVENTS.SCAN_CANCELLED, () => {
     callback();
   });
 }
