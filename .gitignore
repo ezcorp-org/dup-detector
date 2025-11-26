@@ -1,0 +1,67 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+dist/
+build/
+.svelte-kit/
+/package
+
+# Rust / Cargo
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Tauri
+src-tauri/target/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# AI/Editor tool configs
+.claude/
+.cursor/
+.bmad-core/
+
+# Internal dev documentation
+docs/
+
+# Bundled assets
+web-bundles/
+
+# Bun
+bun.lock
+bun.lockb

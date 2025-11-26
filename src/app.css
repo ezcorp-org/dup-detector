@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Background colors - matching landing page */
+  --bg-primary: #08080c;
+  --bg-secondary: #0d0d12;
+  --bg-card: #111116;
+  --bg-elevated: #16161d;
+
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+
+  /* Accent - purple theme */
+  --accent: #8b5cf6;
+  --accent-hover: #a78bfa;
+  --accent-muted: rgba(139, 92, 246, 0.15);
+
+  /* Semantic colors */
+  --success: #4ade80;
+  --success-muted: rgba(74, 222, 128, 0.15);
+  --warning: #fbbf24;
+  --warning-muted: rgba(251, 191, 36, 0.15);
+  --error: #ef4444;
+  --error-muted: rgba(239, 68, 68, 0.15);
+
+  /* Border */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.12);
+  --border-accent: rgba(139, 92, 246, 0.3);
+
+  /* Shadows */
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-accent: rgba(139, 92, 246, 0.25);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-muted);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
