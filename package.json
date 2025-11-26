@@ -1,0 +1,61 @@
+{
+  "name": "duplicate-file-detector",
+  "version": "0.1.0",
+  "description": "A fast, efficient desktop app for detecting and removing duplicate files",
+  "author": "Duplicate File Detector Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ezcorp-org/dup-detector.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ezcorp-org/dup-detector/issues"
+  },
+  "homepage": "https://github.com/ezcorp-org/dup-detector#readme",
+  "keywords": [
+    "duplicate",
+    "files",
+    "tauri",
+    "svelte",
+    "desktop",
+    "file-management",
+    "deduplication"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test": "npm run test:unit && npm run test:e2e",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2",
+    "@tauri-apps/plugin-opener": "^2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.0",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@tauri-apps/cli": "^2",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/svelte": "^5.0.0",
+    "@tsconfig/svelte": "^5.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "jsdom": "^24.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "vitest": "^2.0.0"
+  }
+}

@@ -1,0 +1,239 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ============================================
+  # TEST - Runs on all PRs and pushes
+  # ============================================
+  test:
+    name: Test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      # Frontend tests
+      - name: TypeScript check
+        run: npm run check
+
+      - name: Frontend unit tests
+        run: npm run test:unit
+
+      - name: Build frontend
+        run: npm run build
+
+      # Rust tests
+      - name: Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Rust clippy
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+
+      - name: Rust format check
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+
+  # ============================================
+  # BUILD - Only runs on main branch
+  # ============================================
+  build:
+    name: Build (${{ matrix.target }})
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          shared-key: ${{ matrix.target }}
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target ${{ matrix.target }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.target }}
+          path: |
+            src-tauri/target/${{ matrix.target }}/release/bundle/
+          if-no-files-found: error
+
+  # ============================================
+  # RELEASE - Creates GitHub release with version bump
+  # ============================================
+  release:
+    name: Release
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get current version
+        id: get_version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          CURRENT="${{ steps.get_version.outputs.current }}"
+          # Split version into parts
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          # Increment patch version
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+          echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumping version from $CURRENT to $NEW_VERSION"
+
+      - name: Update version in package.json
+        run: |
+          npm version ${{ steps.bump_version.outputs.new }} --no-git-tag-version
+
+      - name: Update version in Cargo.toml
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ steps.bump_version.outputs.new }}"/' src-tauri/Cargo.toml
+
+      - name: Update version in tauri.conf.json
+        run: |
+          sed -i 's/"version": ".*"/"version": "${{ steps.bump_version.outputs.new }}"/' src-tauri/tauri.conf.json
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
+          git commit -m "chore: bump version to v${{ steps.bump_version.outputs.new }}"
+          git push
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+
+          # Find and copy all release binaries with better names
+          # Linux
+          find artifacts/binaries-x86_64-unknown-linux-gnu -name "*.deb" -exec cp {} release-assets/ \; 2>/dev/null || true
+          find artifacts/binaries-x86_64-unknown-linux-gnu -name "*.AppImage" -exec cp {} release-assets/ \; 2>/dev/null || true
+          find artifacts/binaries-x86_64-unknown-linux-gnu -name "*.rpm" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          # macOS Intel
+          find artifacts/binaries-x86_64-apple-darwin -name "*.dmg" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          # macOS Apple Silicon
+          find artifacts/binaries-aarch64-apple-darwin -name "*.dmg" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          # Windows
+          find artifacts/binaries-x86_64-pc-windows-msvc -name "*.msi" -exec cp {} release-assets/ \; 2>/dev/null || true
+          find artifacts/binaries-x86_64-pc-windows-msvc -name "*.exe" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          echo "Release assets:"
+          ls -la release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.bump_version.outputs.new }}
+          name: v${{ steps.bump_version.outputs.new }}
+          body: |
+            ## Duplicate File Detector v${{ steps.bump_version.outputs.new }}
+
+            ### Downloads
+
+            | Platform | Download |
+            |----------|----------|
+            | Windows | `.msi` installer |
+            | macOS (Apple Silicon) | `.dmg` for M1/M2/M3 |
+            | macOS (Intel) | `.dmg` for Intel |
+            | Linux | `.deb`, `.AppImage`, or `.rpm` |
+
+            ### What's Changed
+
+            See [commit history](https://github.com/${{ github.repository }}/commits/main) for details.
+          files: release-assets/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
