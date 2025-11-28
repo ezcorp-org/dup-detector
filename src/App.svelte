@@ -5,8 +5,8 @@
   import DuplicateGroups from './lib/components/DuplicateGroups.svelte';
   import DeleteControls from './lib/components/DeleteControls.svelte';
   import ErrorPanel from './lib/components/ErrorPanel.svelte';
-  import { scanStore, isScanning, hasResults } from './lib/stores/scanStore';
-  import { formatDuration, formatBytes, pluralize } from './lib/utils/format';
+  import { scanStore, hasResults } from './lib/stores/scanStore';
+  import { formatDuration, pluralize } from './lib/utils/format';
 
   $: statusText = getStatusText($scanStore.status);
 

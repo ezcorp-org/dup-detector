@@ -333,7 +333,7 @@ describe('DeleteControls', () => {
   it('should show partial success message', async () => {
     vi.mocked(tauriApi.deleteFiles).mockResolvedValue({
       deleted: ['/a.txt'],
-      failed: [{ path: '/b.txt', error: 'Permission denied' }],
+      failed: [{ path: '/b.txt', reason: 'Permission denied' }],
     });
 
     const result: ScanResult = {
