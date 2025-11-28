@@ -4,6 +4,8 @@
     hasSelection,
     selectedFilesCount,
     selectedFilesSize,
+    hasResults,
+    totalWastedSpace,
   } from '../stores/scanStore';
   import { deleteFiles } from '../api/tauri';
   import { formatBytes, pluralize } from '../utils/format';
@@ -11,6 +13,7 @@
 
   let useTrash = true;
   let showConfirmDialog = false;
+  let showDeleteAllDialog = false;
   let deleting = false;
   let deleteResult: { deleted: number; failed: number } | null = null;
 
@@ -18,8 +21,15 @@
     showConfirmDialog = true;
   }
 
+  function handleDeleteAllDuplicates() {
+    // First select all duplicates, then show confirm dialog
+    scanStore.selectAllDuplicates();
+    showDeleteAllDialog = true;
+  }
+
   async function confirmDelete() {
     showConfirmDialog = false;
+    showDeleteAllDialog = false;
     deleting = true;
     deleteResult = null;
 
@@ -53,19 +63,30 @@
     showConfirmDialog = false;
   }
 
+  function cancelDeleteAll() {
+    showDeleteAllDialog = false;
+    scanStore.clearAllSelections();
+  }
+
   function getSelectedPaths(): string[] {
     return Array.from($scanStore.selectedForDeletion);
   }
 </script>
 
-{#if $hasSelection || deleteResult}
+{#if $hasResults || $hasSelection || deleteResult}
   <div class="delete-controls">
-    <div class="selection-info">
-      <span class="count">
-        {pluralize($selectedFilesCount, 'file')} selected
-      </span>
-      <span class="size">({formatBytes($selectedFilesSize)})</span>
-    </div>
+    {#if $hasSelection}
+      <div class="selection-info">
+        <span class="count">
+          {pluralize($selectedFilesCount, 'file')} selected
+        </span>
+        <span class="size">({formatBytes($selectedFilesSize)})</span>
+      </div>
+    {:else if $hasResults}
+      <div class="selection-info">
+        <span class="hint">Select files to delete or use "Delete All Duplicates"</span>
+      </div>
+    {/if}
 
     <div class="options">
       <label class="trash-toggle">
@@ -78,24 +99,40 @@
     </div>
 
     <div class="actions">
-      <button
-        class="btn btn-clear"
-        onclick={() => scanStore.clearAllSelections()}
-        disabled={deleting}
-      >
-        Clear Selection
-      </button>
-      <button
-        class="btn btn-delete"
-        onclick={handleDelete}
-        disabled={!$hasSelection || deleting}
-      >
-        {#if deleting}
-          Deleting...
-        {:else}
-          Delete Selected
-        {/if}
-      </button>
+      {#if $hasSelection}
+        <button
+          class="btn btn-clear"
+          onclick={() => scanStore.clearAllSelections()}
+          disabled={deleting}
+        >
+          Clear Selection
+        </button>
+        <button
+          class="btn btn-delete"
+          onclick={handleDelete}
+          disabled={!$hasSelection || deleting}
+        >
+          {#if deleting}
+            Deleting...
+          {:else}
+            Delete Selected
+          {/if}
+        </button>
+      {/if}
+      {#if $hasResults}
+        <button
+          class="btn btn-delete-all"
+          onclick={handleDeleteAllDuplicates}
+          disabled={deleting}
+          title="Select and delete all duplicate files (keeps one copy of each)"
+        >
+          {#if deleting}
+            Deleting...
+          {:else}
+            Delete All Duplicates ({formatBytes($totalWastedSpace)})
+          {/if}
+        </button>
+      {/if}
     </div>
 
     {#if deleteResult}
@@ -118,6 +155,15 @@
     {useTrash}
     onConfirm={confirmDelete}
     onCancel={cancelDelete}
+  />
+{/if}
+
+{#if showDeleteAllDialog}
+  <ConfirmDialog
+    filePaths={getSelectedPaths()}
+    {useTrash}
+    onConfirm={confirmDelete}
+    onCancel={cancelDeleteAll}
   />
 {/if}
 
@@ -207,6 +253,21 @@
 
   .btn-delete:hover:not(:disabled) {
     background: #dc2626;
+  }
+
+  .btn-delete-all {
+    background: var(--warning);
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+
+  .btn-delete-all:hover:not(:disabled) {
+    background: #f59e0b;
+  }
+
+  .hint {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
   }
 
   .result {
