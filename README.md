@@ -45,7 +45,7 @@ sudo pacman -S webkit2gtk-4.1 base-devel curl wget file openssl \
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/user/dup-detector.git
 cd dup-detector
 
 # Install dependencies

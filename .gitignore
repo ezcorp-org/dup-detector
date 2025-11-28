@@ -56,5 +56,12 @@ vite.config.ts.timestamp-*
 .cursor/
 .bmad-core/
 
+# Internal dev documentation
+docs/
+
 # Bundled assets
 web-bundles/
+
+# Bun
+bun.lock
+bun.lockb
