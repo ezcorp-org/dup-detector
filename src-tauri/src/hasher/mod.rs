@@ -10,7 +10,7 @@ use rayon::prelude::*;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::Path;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 
 /// Buffer size for reading files (64 KB).
@@ -104,14 +104,43 @@ pub fn hash_files_parallel<F>(files: Vec<FileEntry>, progress_callback: F) -> Ve
 where
     F: Fn(u64) + Send + Sync,
 {
+    hash_files_parallel_with_cancel(files, progress_callback, || false)
+}
+
+/// Hashes multiple files in parallel using Rayon with cancellation support.
+///
+/// # Arguments
+/// * `files` - List of files to hash
+/// * `progress_callback` - Called after each file is hashed with the current count
+/// * `is_cancelled` - Returns true if cancellation has been requested
+///
+/// # Returns
+/// A vector of HashResults for files that were processed before cancellation.
+pub fn hash_files_parallel_with_cancel<F, C>(
+    files: Vec<FileEntry>,
+    progress_callback: F,
+    is_cancelled: C,
+) -> Vec<HashResult>
+where
+    F: Fn(u64) + Send + Sync,
+    C: Fn() -> bool + Send + Sync,
+{
     let progress_counter = Arc::new(AtomicU64::new(0));
     let callback = Arc::new(progress_callback);
+    let cancel_check = Arc::new(is_cancelled);
+    let cancelled = Arc::new(AtomicBool::new(false));
 
     debug!("Starting parallel hashing of {} files", files.len());
 
     let results: Vec<HashResult> = files
         .into_par_iter()
-        .map(|file| {
+        .filter_map(|file| {
+            // Check for cancellation before processing each file
+            if cancelled.load(Ordering::Relaxed) || cancel_check() {
+                cancelled.store(true, Ordering::Relaxed);
+                return None;
+            }
+
             let path = Path::new(&file.path);
             let result = match hash_file(path) {
                 Ok(hash) => HashResult::success(file, hash),
@@ -125,15 +154,24 @@ where
             let count = progress_counter.fetch_add(1, Ordering::Relaxed) + 1;
             callback(count);
 
-            result
+            // Check cancellation again after hashing
+            if cancel_check() {
+                cancelled.store(true, Ordering::Relaxed);
+            }
+
+            Some(result)
         })
         .collect();
 
-    debug!(
-        "Parallel hashing complete: {} succeeded, {} failed",
-        results.iter().filter(|r| r.is_success()).count(),
-        results.iter().filter(|r| !r.is_success()).count()
-    );
+    if cancelled.load(Ordering::Relaxed) {
+        debug!("Parallel hashing cancelled after {} files", results.len());
+    } else {
+        debug!(
+            "Parallel hashing complete: {} succeeded, {} failed",
+            results.iter().filter(|r| r.is_success()).count(),
+            results.iter().filter(|r| !r.is_success()).count()
+        );
+    }
 
     results
 }

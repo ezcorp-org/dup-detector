@@ -4,7 +4,7 @@
 
 use crate::duplicates::find_duplicates;
 use crate::error::ScannerError;
-use crate::hasher::{extract_hash_errors, extract_successful_hashes, hash_files_parallel};
+use crate::hasher::{extract_hash_errors, extract_successful_hashes, hash_files_parallel_with_cancel};
 use crate::scanner::{group_by_size, scan_directories};
 use crate::state::AppState;
 use crate::types::{
@@ -106,38 +106,44 @@ pub async fn start_scan(
         return Err(ScannerError::Cancelled.into());
     }
 
-    // Phase 3: Hash files in parallel
+    // Phase 3: Hash files in parallel with cancellation support
     let hashed_count = Arc::new(AtomicU64::new(0));
     let last_emit = Arc::new(AtomicU64::new(0));
 
     let handle_clone = app_handle.clone();
-    let state_clone_for_progress = state.inner().clone();
+    let state_ref_for_progress = state.inner();
+    let state_ref_for_cancel = state.inner();
 
-    let hash_results = hash_files_parallel(files_to_hash, move |count| {
-        // Rate-limit progress emissions
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis() as u64;
+    let hash_results = hash_files_parallel_with_cancel(
+        files_to_hash,
+        move |count| {
+            // Rate-limit progress emissions
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_millis() as u64;
 
-        let last = last_emit.load(Ordering::Relaxed);
-        if now - last >= PROGRESS_RATE_LIMIT_MS {
-            last_emit.store(now, Ordering::Relaxed);
-            hashed_count.store(count, Ordering::Relaxed);
+            let last = last_emit.load(Ordering::Relaxed);
+            if now - last >= PROGRESS_RATE_LIMIT_MS {
+                last_emit.store(now, Ordering::Relaxed);
+                hashed_count.store(count, Ordering::Relaxed);
 
-            // Check for cancellation during hashing
-            if !state_clone_for_progress.is_cancel_requested() {
-                emit_progress(
-                    &handle_clone,
-                    count,
-                    Some(files_to_hash_count),
-                    ScanPhase::Hashing,
-                    None,
-                );
+                // Check for cancellation during hashing
+                if !state_ref_for_progress.is_cancel_requested() {
+                    emit_progress(
+                        &handle_clone,
+                        count,
+                        Some(files_to_hash_count),
+                        ScanPhase::Hashing,
+                        None,
+                    );
+                }
             }
-        }
-    });
+        },
+        move || state_ref_for_cancel.is_cancel_requested(),
+    );
 
+    // Check if cancelled during hashing
     if check_cancel(&state, &app_handle) {
         state.finish_scan();
         return Err(ScannerError::Cancelled.into());

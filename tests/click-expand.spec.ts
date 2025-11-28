@@ -8,7 +8,7 @@ test.describe('Click-to-Expand Feature', () => {
     });
 
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText('Duplicate File Detector');
+    await expect(page.locator('h1')).toContainText('Dup Detector');
 
     // Inject mock scan results into the store
     await page.evaluate(() => {
