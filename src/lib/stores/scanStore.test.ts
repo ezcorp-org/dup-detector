@@ -134,6 +134,28 @@ describe('scanStore', () => {
     });
   });
 
+  describe('dismissErrors', () => {
+    it('clears errors array', () => {
+      const result: ScanResult = {
+        duplicateGroups: [],
+        totalFilesScanned: 10,
+        totalDuplicatesFound: 0,
+        totalWastedSpace: 0,
+        errors: [
+          { path: '/bad/path1', message: 'Error 1' },
+          { path: '/bad/path2', message: 'Error 2' },
+        ],
+        durationMs: 100,
+      };
+
+      scanStore.finishScan(result);
+      expect(get(scanStore).errors.length).toBe(2);
+
+      scanStore.dismissErrors();
+      expect(get(scanStore).errors.length).toBe(0);
+    });
+  });
+
   describe('file selection', () => {
     it('toggles file selection', () => {
       scanStore.toggleFileSelection('/test.txt');
@@ -185,6 +207,48 @@ describe('scanStore', () => {
       scanStore.clearAllSelections();
 
       expect(get(scanStore).selectedForDeletion.size).toBe(0);
+    });
+
+    it('selects all duplicates across all groups', () => {
+      const result: ScanResult = {
+        duplicateGroups: [
+          {
+            hash: 'abc',
+            size: 100,
+            files: [
+              { path: '/a.txt', size: 100 },
+              { path: '/b.txt', size: 100 },
+              { path: '/c.txt', size: 100 },
+            ],
+          },
+          {
+            hash: 'def',
+            size: 200,
+            files: [
+              { path: '/d.txt', size: 200 },
+              { path: '/e.txt', size: 200 },
+            ],
+          },
+        ],
+        totalFilesScanned: 10,
+        totalDuplicatesFound: 5,
+        totalWastedSpace: 400,
+        errors: [],
+        durationMs: 100,
+      };
+
+      scanStore.finishScan(result);
+      scanStore.selectAllDuplicates();
+
+      const selected = get(scanStore).selectedForDeletion;
+      // First file of each group should NOT be selected
+      expect(selected.has('/a.txt')).toBe(false);
+      expect(selected.has('/d.txt')).toBe(false);
+      // All other files should be selected
+      expect(selected.has('/b.txt')).toBe(true);
+      expect(selected.has('/c.txt')).toBe(true);
+      expect(selected.has('/e.txt')).toBe(true);
+      expect(selected.size).toBe(3);
     });
   });
 
@@ -344,6 +408,38 @@ describe('derived stores', () => {
 
     scanStore.finishScan(result);
     expect(get(groupCount)).toBe(2);
+  });
+
+  it('totalDuplicateFiles returns correct count', () => {
+    const result: ScanResult = {
+      duplicateGroups: [
+        {
+          hash: 'abc',
+          size: 100,
+          files: [
+            { path: '/a.txt', size: 100 },
+            { path: '/b.txt', size: 100 },
+          ],
+        },
+        {
+          hash: 'def',
+          size: 200,
+          files: [
+            { path: '/c.txt', size: 200 },
+            { path: '/d.txt', size: 200 },
+            { path: '/e.txt', size: 200 },
+          ],
+        },
+      ],
+      totalFilesScanned: 10,
+      totalDuplicatesFound: 5,
+      totalWastedSpace: 0,
+      errors: [],
+      durationMs: 100,
+    };
+
+    scanStore.finishScan(result);
+    expect(get(totalDuplicateFiles)).toBe(5); // 2 + 3 files
   });
 
   it('isScanning returns correct value', () => {
