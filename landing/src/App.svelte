@@ -100,8 +100,6 @@
       return;
     }
 
-    // In production, you'd send this to your backend
-    // For now, we'll just simulate success
     console.log('Email submitted:', email);
     emailSubmitted = true;
     email = '';
@@ -116,27 +114,31 @@
 
   const features = [
     {
-      title: 'Blazing Fast',
+      label: 'Speed',
+      title: 'Blazing fast',
       description:
-        'Built with Rust for maximum performance. Scan 10,000+ files per second using smart hashing algorithms that only read what\'s necessary.',
+        'Built with Rust for maximum performance. Scan 10,000+ files per second using smart hashing that only reads what\'s necessary.',
       icon: 'zap',
     },
     {
-      title: 'Reclaim Drive Space',
+      label: 'Storage',
+      title: 'Reclaim space',
       description:
-        'Free up gigabytes of storage by identifying and removing duplicate files you no longer need.',
+        'Free up gigabytes of storage by identifying duplicate files you no longer need.',
       icon: 'hard-drive',
     },
     {
-      title: 'Safe & Predictable',
+      label: 'Safety',
+      title: 'You\'re in control',
       description:
-        'Duplicates are found, not automatically deleted. You remain in complete control of what stays and what goes.',
+        'Duplicates are found, not automatically deleted. You decide what stays and what goes.',
       icon: 'shield',
     },
     {
-      title: 'Cross Platform',
+      label: 'Platform',
+      title: 'Works everywhere',
       description:
-        'Works on Mac, Windows, and Linux. Same great experience everywhere.',
+        'Native apps for Mac, Windows, and Linux. Same great experience on every platform.',
       icon: 'layers',
     },
   ];
@@ -167,49 +169,73 @@
 
 <div class="min-h-screen">
   <!-- Header -->
-  <header class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-sm border-b border-slate-800/50">
-    <nav class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="/" class="font-mono font-medium text-lg tracking-tight">
-        <span class="text-indigo-400">dup</span><span class="text-slate-400">detector</span>
+  <header class="fixed top-0 left-0 right-0 z-50 bg-bg-primary/80 backdrop-blur-md border-b border-border">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="/" class="font-medium text-lg tracking-tight flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+          <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <span class="text-white">Dup Detector</span>
       </a>
-      <div class="flex items-center gap-8 text-sm">
-        <a href="#features" class="text-slate-400 hover:text-slate-100 transition-colors">Features</a>
-        <a href="#testimonials" class="text-slate-400 hover:text-slate-100 transition-colors">Testimonials</a>
-        <span class="text-slate-600">Free</span>
+      <div class="hidden md:flex items-center gap-8 text-sm">
+        <a href="#features" class="text-zinc-400 hover:text-white transition-colors">Features</a>
+        <a href="#speed" class="text-zinc-400 hover:text-white transition-colors">Performance</a>
+        <a href="#testimonials" class="text-zinc-400 hover:text-white transition-colors">Testimonials</a>
       </div>
+      <a
+        href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`}
+        target="_blank"
+        rel="noopener"
+        class="px-4 py-2 rounded-lg border border-border hover:border-border-hover hover:bg-white/5 text-sm text-zinc-300 transition-all"
+      >
+        View on GitHub
+      </a>
     </nav>
   </header>
 
   <!-- Hero -->
-  <section class="pt-32 pb-20 px-6">
-    <div class="max-w-3xl mx-auto text-center">
-      <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6">
-        Find Duplicates.<br />
-        <span class="text-indigo-400">Fast.</span>
+  <section class="pt-32 pb-24 px-6 relative overflow-hidden">
+    <!-- Subtle gradient background -->
+    <div class="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent pointer-events-none"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-accent/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-4xl mx-auto text-center relative">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-medium mb-8">
+        <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+        Free & Open Source
+      </div>
+
+      <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
+        Find duplicates<br />
+        <span class="text-accent">Fast.</span>
       </h1>
-      <p class="text-xl text-slate-400 mb-10 max-w-xl mx-auto">
-        A free, simple tool to detect duplicate files and reclaim your drive space. No complex menus. No subscriptions. Just results.
+
+      <p class="text-lg md:text-xl text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+        A free, open source desktop app to detect duplicate files and reclaim your drive space.
+        No complex menus. No subscriptions. No tracking. Just results.
       </p>
 
       <div class="flex flex-col items-center gap-4">
         {#if isLoading}
           <button
             disabled
-            class="px-8 py-4 bg-slate-800 text-slate-400 rounded-lg font-medium cursor-wait"
+            class="px-8 py-4 bg-bg-card text-zinc-500 rounded-xl font-medium cursor-wait"
           >
             Checking for latest version...
           </button>
         {:else if downloadUrl}
           <button
             onclick={handleDownload}
-            class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors flex items-center gap-3"
+            class="group px-8 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-medium transition-all flex items-center gap-3 shadow-lg shadow-accent/25"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             Download for {osNames[userOS]}
           </button>
-          <span class="text-sm text-slate-500">
+          <span class="text-sm text-zinc-500">
             {latestVersion} &middot; {downloadFileName}
           </span>
         {:else}
@@ -217,25 +243,25 @@
             href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`}
             target="_blank"
             rel="noopener"
-            class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors"
+            class="px-8 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-medium transition-colors shadow-lg shadow-accent/25"
           >
             View Downloads
           </a>
         {/if}
 
         {#if allAssets.length > 1}
-          <details class="text-sm text-slate-400 mt-2">
-            <summary class="cursor-pointer hover:text-slate-300 transition-colors">
+          <details class="text-sm text-zinc-500 mt-2">
+            <summary class="cursor-pointer hover:text-zinc-300 transition-colors">
               Other platforms
             </summary>
-            <div class="mt-3 flex flex-wrap justify-center gap-2">
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
               {#each allAssets as asset}
                 <button
                   onclick={() => selectDownload(asset)}
-                  class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded text-xs transition-colors"
+                  class="px-4 py-2 bg-bg-card hover:bg-bg-elevated border border-border hover:border-border-hover rounded-lg text-xs transition-all"
                 >
                   {asset.name}
-                  <span class="text-slate-500 ml-1">({formatSize(asset.size)})</span>
+                  <span class="text-zinc-600 ml-1">({formatSize(asset.size)})</span>
                 </button>
               {/each}
             </div>
@@ -243,98 +269,222 @@
         {/if}
       </div>
 
-      <p class="mt-8 text-sm text-slate-500">
-        Works on macOS, Windows & Linux. Always free.
+      <p class="mt-10 text-sm text-zinc-600">
+        Available for macOS, Windows & Linux
       </p>
     </div>
   </section>
 
   <!-- Speed Highlight -->
-  <section class="py-16 px-6 border-y border-slate-800/50">
-    <div class="max-w-4xl mx-auto">
-      <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-        <div class="text-center">
-          <div class="font-mono text-5xl md:text-6xl font-bold text-indigo-400 mb-2">10,000+</div>
-          <div class="text-slate-400 text-sm">files scanned per second</div>
-        </div>
-        <div class="hidden md:block w-px h-16 bg-slate-800"></div>
-        <div class="text-center max-w-xs">
-          <p class="text-slate-300 text-sm leading-relaxed">
-            Written in <span class="text-indigo-400 font-medium">Rust</span> for native performance.
-            Smart hashing compares file sizes first, then partial content, only fully hashing when necessary.
+  <section id="speed" class="py-20 px-6 bg-bg-secondary border-y border-border">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-medium mb-6">
+            Performance
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            Built for speed
+          </h2>
+          <p class="text-zinc-400 leading-relaxed mb-6">
+            Written in Rust for native performance. Smart hashing compares file sizes first,
+            then partial content, only fully hashing when necessary.
           </p>
+          <ul class="space-y-3">
+            <li class="flex items-center gap-3 text-sm text-zinc-300">
+              <div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                <svg class="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              Multi-threaded scanning
+            </li>
+            <li class="flex items-center gap-3 text-sm text-zinc-300">
+              <div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                <svg class="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              Smart partial hashing
+            </li>
+            <li class="flex items-center gap-3 text-sm text-zinc-300">
+              <div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                <svg class="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              Minimal memory footprint
+            </li>
+          </ul>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-6 rounded-2xl bg-bg-card border border-border">
+            <div class="font-mono text-4xl font-bold text-accent mb-2">10k+</div>
+            <div class="text-sm text-zinc-500">files per second</div>
+          </div>
+          <div class="p-6 rounded-2xl bg-bg-card border border-border">
+            <div class="font-mono text-4xl font-bold text-accent mb-2">&lt;1s</div>
+            <div class="text-sm text-zinc-500">typical scan time</div>
+          </div>
+          <div class="p-6 rounded-2xl bg-bg-card border border-border">
+            <div class="font-mono text-4xl font-bold text-accent mb-2">100%</div>
+            <div class="text-sm text-zinc-500">free forever</div>
+          </div>
+          <div class="p-6 rounded-2xl bg-bg-card border border-border">
+            <div class="font-mono text-4xl font-bold text-accent mb-2">0</div>
+            <div class="text-sm text-zinc-500">auto-deleted files</div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Features -->
-  <section id="features" class="py-20 px-6 bg-slate-900/50">
+  <section id="features" class="py-24 px-6">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-3xl font-bold text-center mb-12">Simple by design</h2>
-      <div class="grid md:grid-cols-2 gap-8">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-medium mb-6">
+          Features
+        </div>
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">What we do</h2>
+        <p class="text-zinc-400 max-w-xl mx-auto">
+          Simple tools that do one thing well. Find duplicates, reclaim your space.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
         {#each features as feature}
-          <div class="p-6 rounded-xl bg-slate-800/50 border border-slate-700/50">
-            <div class="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center mb-4">
-              {#if feature.icon === 'zap'}
-                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              {:else if feature.icon === 'hard-drive'}
-                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                </svg>
-              {:else if feature.icon === 'shield'}
-                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              {:else if feature.icon === 'layers'}
-                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              {/if}
+          <div class="group p-6 rounded-2xl bg-bg-card border border-border hover:border-accent/30 transition-all">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 group-hover:bg-accent/20 transition-colors">
+                {#if feature.icon === 'zap'}
+                  <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                {:else if feature.icon === 'hard-drive'}
+                  <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                  </svg>
+                {:else if feature.icon === 'shield'}
+                  <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                {:else if feature.icon === 'layers'}
+                  <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                {/if}
+              </div>
+              <div>
+                <div class="text-xs text-accent font-medium mb-1">{feature.label}</div>
+                <h3 class="text-lg font-semibold mb-2 text-white">{feature.title}</h3>
+                <p class="text-zinc-400 text-sm leading-relaxed">{feature.description}</p>
+              </div>
             </div>
-            <h3 class="text-lg font-semibold mb-2">{feature.title}</h3>
-            <p class="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
           </div>
         {/each}
       </div>
     </div>
   </section>
 
-  <!-- Metrics -->
-  <section class="py-20 px-6">
+  <!-- Open Source -->
+  <section class="py-24 px-6 bg-bg-secondary border-y border-border">
     <div class="max-w-5xl mx-auto">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
         <div>
-          <div class="text-4xl font-bold text-indigo-400 mb-2">&lt;1s</div>
-          <div class="text-sm text-slate-400">Typical scan time</div>
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-medium mb-6">
+            Open Source
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            Fully transparent
+          </h2>
+          <p class="text-zinc-400 leading-relaxed mb-6">
+            Dup Detector is 100% open source. Inspect the code, suggest improvements,
+            or build your own version. No hidden trackers, no telemetry, no surprises.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a
+              href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-bg-card border border-border hover:border-accent/30 rounded-xl text-sm font-medium transition-all"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              View on GitHub
+            </a>
+            <a
+              href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/issues`}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-2 px-5 py-2.5 text-zinc-400 hover:text-white text-sm font-medium transition-colors"
+            >
+              Report an issue
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
         </div>
-        <div>
-          <div class="text-4xl font-bold text-indigo-400 mb-2">100%</div>
-          <div class="text-sm text-slate-400">Free forever</div>
-        </div>
-        <div>
-          <div class="text-4xl font-bold text-indigo-400 mb-2">3</div>
-          <div class="text-sm text-slate-400">Platforms supported</div>
-        </div>
-        <div>
-          <div class="text-4xl font-bold text-indigo-400 mb-2">0</div>
-          <div class="text-sm text-slate-400">Files auto-deleted</div>
+        <div class="grid grid-cols-1 gap-4">
+          <div class="p-5 rounded-2xl bg-bg-card border border-border flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">Fully auditable</h3>
+              <p class="text-zinc-400 text-sm">Every line of code is public. See exactly what runs on your machine.</p>
+            </div>
+          </div>
+          <div class="p-5 rounded-2xl bg-bg-card border border-border flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">Privacy first</h3>
+              <p class="text-zinc-400 text-sm">No analytics, no telemetry, no data collection. Your files stay yours.</p>
+            </div>
+          </div>
+          <div class="p-5 rounded-2xl bg-bg-card border border-border flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-white mb-1">Community driven</h3>
+              <p class="text-zinc-400 text-sm">Built by developers, for everyone. Contributions welcome.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Testimonials -->
-  <section id="testimonials" class="py-20 px-6 bg-slate-900/50">
-    <div class="max-w-4xl mx-auto">
-      <h2 class="text-3xl font-bold text-center mb-12">What people say</h2>
+  <section id="testimonials" class="py-24 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-medium mb-6">
+          Testimonials
+        </div>
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">What people say</h2>
+      </div>
+
       <div class="grid md:grid-cols-3 gap-6">
         {#each testimonials as testimonial}
-          <div class="p-6 rounded-xl bg-slate-800/50 border border-slate-700/50">
-            <p class="text-slate-300 text-sm leading-relaxed mb-4">"{testimonial.quote}"</p>
-            <p class="text-slate-500 text-xs">— {testimonial.author}</p>
+          <div class="p-6 rounded-2xl bg-bg-card border border-border">
+            <svg class="w-8 h-8 text-accent/30 mb-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
+            <p class="text-zinc-300 text-sm leading-relaxed mb-4">{testimonial.quote}</p>
+            <p class="text-zinc-500 text-xs font-medium">— {testimonial.author}</p>
           </div>
         {/each}
       </div>
@@ -342,51 +492,51 @@
   </section>
 
   <!-- Email Signup -->
-  <section class="py-20 px-6">
-    <div class="max-w-md mx-auto text-center">
-      <h2 class="text-2xl font-bold mb-4">Stay updated</h2>
-      <p class="text-slate-400 text-sm mb-6">
+  <section class="py-24 px-6">
+    <div class="max-w-lg mx-auto text-center">
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">Stay updated</h2>
+      <p class="text-zinc-400 text-sm mb-8">
         Get notified about new features and releases. No spam, ever.
       </p>
 
       {#if emailSubmitted}
-        <div class="p-4 bg-green-900/30 border border-green-700/50 rounded-lg text-green-400 text-sm">
+        <div class="p-4 bg-accent/10 border border-accent/20 rounded-xl text-accent text-sm">
           Thanks! We'll keep you posted.
         </div>
       {:else}
-        <form onsubmit={handleEmailSubmit} class="flex gap-2">
+        <form onsubmit={handleEmailSubmit} class="flex gap-3">
           <input
             type="email"
             bind:value={email}
             placeholder="you@example.com"
-            class="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+            class="flex-1 px-4 py-3 bg-bg-card border border-border rounded-xl text-sm focus:outline-none focus:border-accent/50 transition-colors placeholder:text-zinc-600"
           />
           <button
             type="submit"
-            class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium text-sm transition-colors whitespace-nowrap"
+            class="px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-medium text-sm transition-colors whitespace-nowrap"
           >
             Notify me
           </button>
         </form>
         {#if emailError}
-          <p class="mt-2 text-red-400 text-sm">{emailError}</p>
+          <p class="mt-3 text-red-400 text-sm">{emailError}</p>
         {/if}
       {/if}
     </div>
   </section>
 
   <!-- CTA -->
-  <section class="py-20 px-6 border-t border-slate-800">
+  <section class="py-24 px-6 border-t border-border">
     <div class="max-w-2xl mx-auto text-center">
-      <h2 class="text-3xl font-bold mb-4">Ready to reclaim your space?</h2>
-      <p class="text-slate-400 mb-8">Download Dup Detector and find those duplicates in seconds.</p>
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to reclaim your space?</h2>
+      <p class="text-zinc-400 mb-10">Download Dup Detector and find those duplicates in seconds.</p>
 
       {#if downloadUrl}
         <button
           onclick={handleDownload}
-          class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors inline-flex items-center gap-3"
+          class="group px-8 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-medium transition-all inline-flex items-center gap-3 shadow-lg shadow-accent/25"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
           Download Now
@@ -396,7 +546,7 @@
           href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`}
           target="_blank"
           rel="noopener"
-          class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors inline-block"
+          class="px-8 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-medium transition-colors inline-block shadow-lg shadow-accent/25"
         >
           Download Now
         </a>
@@ -405,22 +555,36 @@
   </section>
 
   <!-- Footer -->
-  <footer class="py-12 px-6 border-t border-slate-800">
-    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="font-mono text-sm text-slate-500">
-        <span class="text-indigo-400">dup</span><span class="text-slate-600">detector</span>
-        <span class="ml-2">&middot; Free & Open Source</span>
+  <footer class="py-12 px-6 border-t border-border bg-bg-secondary">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <div class="font-medium text-white">Dup Detector</div>
+            <div class="text-xs text-zinc-500">Free & Open Source</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-8 text-sm">
+          <a
+            href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`}
+            target="_blank"
+            rel="noopener"
+            class="text-zinc-400 hover:text-white transition-colors"
+          >
+            GitHub
+          </a>
+          <span class="text-zinc-700">Don't Follow</span>
+        </div>
       </div>
-      <div class="flex items-center gap-6 text-sm text-slate-500">
-        <a
-          href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`}
-          target="_blank"
-          rel="noopener"
-          class="hover:text-slate-300 transition-colors"
-        >
-          GitHub
-        </a>
-        <span class="text-slate-700">Don't Follow</span>
+
+      <div class="mt-8 pt-8 border-t border-border text-center text-xs text-zinc-600">
+        &copy; {new Date().getFullYear()} Dup Detector. All rights reserved.
       </div>
     </div>
   </footer>
