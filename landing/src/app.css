@@ -7,9 +7,9 @@ html {
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+  @apply bg-bg-primary text-white antialiased;
 }
 
 ::selection {
-  @apply bg-indigo-500/30;
+  @apply bg-accent/30;
 }
