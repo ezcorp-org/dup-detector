@@ -5,6 +5,15 @@
   const GITHUB_OWNER = 'your-username';
   const GITHUB_REPO = 'dup-detector';
 
+  // Mouse spotlight
+  let mouseX = $state(0);
+  let mouseY = $state(0);
+
+  function handleMouseMove(e: MouseEvent) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  }
+
   type OS = 'mac' | 'windows' | 'linux' | 'unknown';
   type ReleaseAsset = {
     name: string;
@@ -167,7 +176,13 @@
   });
 </script>
 
-<div class="min-h-screen">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="min-h-screen relative" onmousemove={handleMouseMove}>
+  <!-- Mouse spotlight -->
+  <div
+    class="pointer-events-none fixed inset-0 z-30 transition-opacity duration-300"
+    style="background: radial-gradient(600px circle at {mouseX}px {mouseY}px, rgba(139, 92, 246, 0.06), transparent 40%)"
+  ></div>
   <!-- Header -->
   <header class="fixed top-0 left-0 right-0 z-50 bg-bg-primary/80 backdrop-blur-md border-b border-border">
     <nav class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
