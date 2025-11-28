@@ -2,14 +2,13 @@
  * Centralized state management for the duplicate scan functionality.
  */
 
-import { writable, derived, get } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import type {
   ScanStatus,
   ScanProgress,
   ScanResult,
   DuplicateGroup,
   ScanError,
-  ScanOptions,
 } from '../types';
 
 /** State for the scan store. */
