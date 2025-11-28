@@ -17,6 +17,13 @@
   <div class="error-panel">
     <button class="header" onclick={toggle}>
       <span class="icon">{expanded ? '▼' : '▶'}</span>
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
       <span class="title">
         {pluralize($scanStore.errors.length, 'problem')} encountered
       </span>
@@ -43,9 +50,9 @@
 
 <style>
   .error-panel {
-    background: rgba(251, 191, 36, 0.1);
+    background: var(--warning-muted);
     border: 1px solid var(--warning);
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
   }
 
@@ -53,34 +60,48 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
     background: none;
     border: none;
     cursor: pointer;
     color: var(--warning);
     text-align: left;
+    transition: background-color 0.2s;
   }
 
   .header:hover {
-    background: rgba(251, 191, 36, 0.05);
+    background: rgba(251, 191, 36, 0.1);
   }
 
   .icon {
-    font-size: 0.75rem;
+    font-size: 0.625rem;
+    color: var(--warning);
+  }
+
+  .header-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .header-icon svg {
+    width: 100%;
+    height: 100%;
   }
 
   .title {
     flex: 1;
     font-weight: 500;
+    font-size: 0.875rem;
   }
 
   .badge {
     background: var(--warning);
     color: var(--bg-primary);
-    padding: 0.125rem 0.5rem;
+    padding: 0.125rem 0.625rem;
     border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
   }
 
@@ -95,39 +116,43 @@
   }
 
   .error-item {
-    padding: 0.5rem;
-    background: var(--bg-secondary);
-    border-radius: 4px;
+    padding: 0.625rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     margin-bottom: 0.5rem;
   }
 
   .path {
     display: block;
-    font-family: monospace;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-bottom: 0.25rem;
   }
 
   .message {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: var(--text-primary);
   }
 
   .btn-dismiss {
-    padding: 0.375rem 0.75rem;
-    background: var(--bg-tertiary);
-    border: none;
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     color: var(--text-primary);
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: all 0.2s;
   }
 
   .btn-dismiss:hover {
-    background: var(--border);
+    border-color: var(--border-hover);
   }
 </style>

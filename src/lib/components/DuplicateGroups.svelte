@@ -119,16 +119,18 @@
 {#if $hasResults}
   <div class="duplicate-groups">
     <div class="summary">
-      <span class="stat">
-        <strong>{$groupCount}</strong>
-        {pluralize($groupCount, 'group', 'groups').split(' ')[1]}
-      </span>
-      <span class="stat">
-        <strong>{$totalDuplicateFiles}</strong> duplicate files
-      </span>
-      <span class="stat wasted">
-        <strong>{formatBytes($totalWastedSpace)}</strong> wasted
-      </span>
+      <div class="stat">
+        <span class="stat-value">{$groupCount}</span>
+        <span class="stat-label">{pluralize($groupCount, 'group', 'groups').split(' ')[1]}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{$totalDuplicateFiles}</span>
+        <span class="stat-label">duplicate files</span>
+      </div>
+      <div class="stat wasted">
+        <span class="stat-value">{formatBytes($totalWastedSpace)}</span>
+        <span class="stat-label">wasted</span>
+      </div>
     </div>
 
     <div class="groups-list">
@@ -202,7 +204,9 @@
                         title="Delete this file"
                         disabled={deleting}
                       >
-                        🗑
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                        </svg>
                       </button>
                     </div>
                     {#if expandedFiles.has(file.path)}
@@ -232,6 +236,12 @@
   </div>
 {:else if $scanStore.status === 'finished'}
   <div class="no-results">
+    <div class="no-results-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
     <h3>No Duplicates Found</h3>
     <p>Great news! No duplicate files were found in the selected folders.</p>
   </div>
@@ -248,9 +258,10 @@
 
 <style>
   .duplicate-groups {
-    background: var(--bg-secondary);
-    border-radius: 8px;
-    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
   }
 
   .summary {
@@ -262,15 +273,23 @@
   }
 
   .stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .stat-label {
+    font-size: 0.8125rem;
     color: var(--text-secondary);
   }
 
-  .stat strong {
-    color: var(--text-primary);
-    font-size: 1.125rem;
-  }
-
-  .stat.wasted strong {
+  .stat.wasted .stat-value {
     color: var(--warning);
   }
 
@@ -281,13 +300,14 @@
 
   .group {
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: var(--radius);
     margin-bottom: 0.5rem;
     overflow: hidden;
+    transition: border-color 0.2s;
   }
 
   .group.expanded {
-    border-color: var(--accent);
+    border-color: var(--border-accent);
   }
 
   .group-header {
@@ -296,30 +316,32 @@
     align-items: center;
     gap: 1rem;
     padding: 0.75rem 1rem;
-    background: var(--bg-tertiary);
+    background: var(--bg-elevated);
     border: none;
     cursor: pointer;
     text-align: left;
     color: var(--text-primary);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    transition: background-color 0.2s;
   }
 
   .group-header:hover {
-    background: var(--border);
+    background: var(--bg-secondary);
   }
 
   .expand-icon {
-    color: var(--text-secondary);
-    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.625rem;
   }
 
   .hash {
-    font-family: monospace;
-    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
   }
 
   .size {
     font-weight: 500;
+    color: var(--text-primary);
   }
 
   .count {
@@ -334,9 +356,10 @@
   .selected-badge {
     background: var(--accent);
     color: white;
-    padding: 0.125rem 0.5rem;
+    padding: 0.125rem 0.625rem;
     border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
   }
 
   .group-content {
@@ -352,16 +375,17 @@
 
   .btn {
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: var(--radius);
     border: none;
     font-weight: 500;
+    font-size: 0.8125rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
   }
 
   .btn-small {
     padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
 
   .btn:not(.btn-secondary) {
@@ -374,12 +398,13 @@
   }
 
   .btn-secondary {
-    background: var(--bg-tertiary);
+    background: var(--bg-elevated);
     color: var(--text-primary);
+    border: 1px solid var(--border);
   }
 
   .btn-secondary:hover {
-    background: var(--border);
+    border-color: var(--border-hover);
   }
 
   .file-list {
@@ -389,19 +414,20 @@
   }
 
   .file-item-wrapper {
-    background: var(--bg-secondary);
-    border-radius: 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     overflow: hidden;
     transition: all 0.2s ease;
   }
 
   .file-item-wrapper:hover {
-    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
   }
 
   .file-item-wrapper.selected {
-    background: rgba(233, 69, 96, 0.1);
-    border: 1px solid var(--accent);
+    background: var(--accent-muted);
+    border-color: var(--border-accent);
   }
 
   .file-item-wrapper.first {
@@ -409,21 +435,21 @@
   }
 
   .file-item-wrapper.expanded {
-    border-color: var(--accent);
+    border-color: var(--border-accent);
   }
 
   .file-item-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 0.875rem;
     cursor: pointer;
   }
 
   .file-expand-icon {
-    color: var(--text-secondary);
-    font-size: 0.625rem;
-    width: 12px;
+    color: var(--text-muted);
+    font-size: 0.5rem;
+    width: 10px;
     flex-shrink: 0;
   }
 
@@ -442,23 +468,25 @@
   .file-name {
     display: block;
     font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text-primary);
   }
 
   .file-path {
     display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .keep-badge {
-    background: var(--success);
-    color: white;
+    background: var(--success-muted);
+    color: var(--success);
     padding: 0.125rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.6875rem;
     font-weight: 500;
     flex-shrink: 0;
   }
@@ -467,17 +495,26 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    opacity: 0.6;
+    padding: 0.375rem;
+    border-radius: var(--radius-sm);
+    opacity: 0.5;
     transition: all 0.2s;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+  }
+
+  .btn-delete-file svg {
+    width: 16px;
+    height: 16px;
   }
 
   .btn-delete-file:hover:not(:disabled) {
     opacity: 1;
-    background: rgba(239, 68, 68, 0.2);
+    background: var(--error-muted);
+    color: var(--error);
   }
 
   .btn-delete-file:disabled {
@@ -486,8 +523,8 @@
   }
 
   .file-details {
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
-    background: var(--bg-tertiary);
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    background: var(--bg-elevated);
     border-top: 1px solid var(--border);
   }
 
@@ -495,7 +532,7 @@
     display: flex;
     gap: 0.5rem;
     margin-bottom: 0.375rem;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
   }
 
   .detail-row:last-child {
@@ -503,29 +540,49 @@
   }
 
   .detail-label {
-    color: var(--text-secondary);
+    color: var(--text-muted);
     flex-shrink: 0;
-    min-width: 80px;
+    min-width: 70px;
   }
 
   .detail-value {
-    color: var(--text-primary);
+    color: var(--text-secondary);
   }
 
   .detail-value.path {
-    font-family: monospace;
-    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6875rem;
     word-break: break-all;
   }
 
   .no-results {
     text-align: center;
     padding: 3rem;
-    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  .no-results-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    color: var(--success);
+  }
+
+  .no-results-icon svg {
+    width: 100%;
+    height: 100%;
   }
 
   .no-results h3 {
     color: var(--success);
     margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+  }
+
+  .no-results p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
   }
 </style>

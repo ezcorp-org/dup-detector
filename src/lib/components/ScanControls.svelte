@@ -153,16 +153,17 @@
 
 <style>
   .scan-controls {
-    background: var(--bg-secondary);
-    border-radius: 8px;
-    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
   }
 
   .filters {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
   }
 
   .filter-group {
@@ -176,7 +177,7 @@
   }
 
   .filter-group label {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
     display: flex;
     align-items: center;
@@ -185,24 +186,33 @@
 
   .filter-group input[type="text"],
   .filter-group input[type="number"] {
-    background: var(--bg-tertiary);
+    background: var(--bg-elevated);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.5rem;
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
     color: var(--text-primary);
+    font-size: 0.8125rem;
+    transition: border-color 0.2s;
+  }
+
+  .filter-group input[type="text"]:focus,
+  .filter-group input[type="number"]:focus {
+    border-color: var(--accent);
+    outline: none;
   }
 
   .filter-group input:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
   .filter-group select {
-    background: var(--bg-tertiary);
+    background: var(--bg-elevated);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.5rem;
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
     color: var(--text-primary);
+    font-size: 0.8125rem;
   }
 
   .size-input {
@@ -225,21 +235,23 @@
 
   .btn {
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: var(--radius);
     border: none;
     font-weight: 500;
+    font-size: 0.8125rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
   }
 
   .btn:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
   .btn-primary {
     background: var(--accent);
     color: white;
+    box-shadow: 0 4px 12px var(--shadow-accent);
   }
 
   .btn-primary:hover:not(:disabled) {
@@ -248,7 +260,7 @@
 
   .btn-large {
     padding: 0.75rem 2rem;
-    font-size: 1rem;
+    font-size: 0.875rem;
   }
 
   .btn-danger {
