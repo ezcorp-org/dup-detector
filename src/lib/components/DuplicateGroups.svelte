@@ -127,9 +127,9 @@
         <span class="stat-value">{$totalDuplicateFiles}</span>
         <span class="stat-label">duplicate files</span>
       </div>
-      <div class="stat wasted">
+      <div class="stat duplicates">
         <span class="stat-value">{formatBytes($totalWastedSpace)}</span>
-        <span class="stat-label">wasted</span>
+        <span class="stat-label">duplicates detected</span>
       </div>
     </div>
 
@@ -144,7 +144,7 @@
             <span class="hash" title={group.hash}>{truncateHash(group.hash)}</span>
             <span class="size">{formatBytes(group.size)}</span>
             <span class="count">{group.files.length} files</span>
-            <span class="wasted">{formatBytes(wastedSpace)} wasted</span>
+            <span class="recoverable">{formatBytes(wastedSpace)} recoverable</span>
             {#if selectedCount > 0}
               <span class="selected-badge">{selectedCount} selected</span>
             {/if}
@@ -289,7 +289,7 @@
     color: var(--text-secondary);
   }
 
-  .stat.wasted .stat-value {
+  .stat.duplicates .stat-value {
     color: var(--warning);
   }
 
@@ -348,7 +348,7 @@
     color: var(--text-secondary);
   }
 
-  .wasted {
+  .recoverable {
     color: var(--warning);
     margin-left: auto;
   }

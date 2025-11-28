@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Duplicate File Detector', () => {
   test('shows app title', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText('Duplicate File Detector');
+    await expect(page.locator('h1')).toContainText('Dup Detector');
   });
 
   test('shows folder selector', async ({ page }) => {
@@ -15,7 +15,7 @@ test.describe('Duplicate File Detector', () => {
   test('shows scan controls', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('text=Start Scan')).toBeVisible();
-    await expect(page.locator('text=Min File Size')).toBeVisible();
+    await expect(page.locator('text=Advanced Filtering')).toBeVisible();
   });
 
   test('start scan button is disabled without folders', async ({ page }) => {
