@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Back document -->
+  <g opacity="0.5">
+    <path d="M20 8h16l12 12v32a4 4 0 01-4 4H20a4 4 0 01-4-4V12a4 4 0 014-4z" fill="currentColor"/>
+    <path d="M36 8v8a4 4 0 004 4h8" fill="currentColor" opacity="0.7"/>
+  </g>
+  <!-- Front document -->
+  <g>
+    <path d="M28 16h16l12 12v28a4 4 0 01-4 4H28a4 4 0 01-4-4V20a4 4 0 014-4z" fill="currentColor"/>
+    <path d="M44 16v8a4 4 0 004 4h8" fill="currentColor" opacity="0.7"/>
+    <!-- Document lines -->
+    <rect x="30" y="38" width="20" height="3" rx="1.5" fill="currentColor" opacity="0.3"/>
+    <rect x="30" y="45" width="16" height="3" rx="1.5" fill="currentColor" opacity="0.3"/>
+    <rect x="30" y="52" width="12" height="3" rx="1.5" fill="currentColor" opacity="0.3"/>
+  </g>
+</svg>
