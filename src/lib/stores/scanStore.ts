@@ -171,6 +171,17 @@ function createScanStore() {
         selectedForDeletion: new Set(),
       })),
 
+    /** Selects all duplicates (all but one from each group) across all groups. */
+    selectAllDuplicates: () =>
+      update((state) => {
+        const newSet = new Set(state.selectedForDeletion);
+        // For each group, select all files except the first one
+        state.duplicateGroups.forEach((group) => {
+          group.files.slice(1).forEach((file) => newSet.add(file.path));
+        });
+        return { ...state, selectedForDeletion: newSet };
+      }),
+
     /** Removes deleted files from the duplicate groups. */
     removeDeletedFiles: (deletedPaths: string[]) =>
       update((state) => {
@@ -207,6 +218,11 @@ function createScanStore() {
 
 /** The scan store singleton. */
 export const scanStore = createScanStore();
+
+// Expose store to window for e2e testing
+if (typeof window !== 'undefined') {
+  (window as any).__scanStore = scanStore;
+}
 
 // Derived stores for computed values
 
