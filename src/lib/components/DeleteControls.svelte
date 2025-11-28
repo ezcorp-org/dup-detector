@@ -101,14 +101,14 @@
     <div class="actions">
       {#if $hasSelection}
         <button
-          class="btn btn-clear"
+          class="btn btn-secondary"
           onclick={() => scanStore.clearAllSelections()}
           disabled={deleting}
         >
           Clear Selection
         </button>
         <button
-          class="btn btn-delete"
+          class="btn btn-danger"
           onclick={handleDelete}
           disabled={!$hasSelection || deleting}
         >
@@ -121,7 +121,7 @@
       {/if}
       {#if $hasResults}
         <button
-          class="btn btn-delete-all"
+          class="btn btn-warning"
           onclick={handleDeleteAllDuplicates}
           disabled={deleting}
           title="Select and delete all duplicate files (keeps one copy of each)"
@@ -169,9 +169,10 @@
 
 <style>
   .delete-controls {
-    background: var(--bg-secondary);
-    border-radius: 8px;
-    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -187,11 +188,12 @@
   .count {
     font-weight: 600;
     color: var(--accent);
+    font-size: 0.875rem;
   }
 
   .size {
     color: var(--text-secondary);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
   }
 
   .options {
@@ -206,6 +208,8 @@
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
   }
 
   .trash-toggle input {
@@ -214,7 +218,7 @@
 
   .warning {
     color: var(--error);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 500;
   }
 
@@ -225,62 +229,64 @@
 
   .btn {
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: var(--radius);
     border: none;
     font-weight: 500;
+    font-size: 0.8125rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
   }
 
   .btn:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
-  .btn-clear {
-    background: var(--bg-tertiary);
+  .btn-secondary {
+    background: var(--bg-elevated);
     color: var(--text-primary);
+    border: 1px solid var(--border);
   }
 
-  .btn-clear:hover:not(:disabled) {
-    background: var(--border);
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--border-hover);
   }
 
-  .btn-delete {
+  .btn-danger {
     background: var(--error);
     color: white;
   }
 
-  .btn-delete:hover:not(:disabled) {
+  .btn-danger:hover:not(:disabled) {
     background: #dc2626;
   }
 
-  .btn-delete-all {
+  .btn-warning {
     background: var(--warning);
-    color: #1a1a2e;
+    color: var(--bg-primary);
     font-weight: 600;
   }
 
-  .btn-delete-all:hover:not(:disabled) {
+  .btn-warning:hover:not(:disabled) {
     background: #f59e0b;
   }
 
   .hint {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
   }
 
   .result {
     width: 100%;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    background: rgba(239, 68, 68, 0.1);
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.8125rem;
+    background: var(--error-muted);
     color: var(--error);
   }
 
   .result.success {
-    background: rgba(74, 222, 128, 0.1);
+    background: var(--success-muted);
     color: var(--success);
   }
 </style>
