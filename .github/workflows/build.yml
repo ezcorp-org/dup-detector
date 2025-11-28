@@ -1,4 +1,4 @@
-name: Build and Test
+name: CI/CD
 
 on:
   push:
@@ -10,8 +10,12 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test-frontend:
-    runs-on: ubuntu-latest
+  # ============================================
+  # TEST - Runs on all PRs and pushes
+  # ============================================
+  test:
+    name: Test
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -21,17 +25,49 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install npm dependencies
         run: npm ci
 
-      - name: Run unit tests
+      # Frontend tests
+      - name: TypeScript check
+        run: npm run check
+
+      - name: Frontend unit tests
         run: npm run test:unit
 
       - name: Build frontend
         run: npm run build
 
-  build-tauri:
-    needs: test-frontend
+      # Rust tests
+      - name: Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Rust clippy
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+
+      - name: Rust format check
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+
+  # ============================================
+  # BUILD - Only runs on main branch
+  # ============================================
+  build:
+    name: Build (${{ matrix.target }})
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     strategy:
       fail-fast: false
       matrix:
@@ -90,17 +126,114 @@ jobs:
             src-tauri/target/${{ matrix.target }}/release/bundle/
           if-no-files-found: error
 
+  # ============================================
+  # RELEASE - Creates GitHub release with version bump
+  # ============================================
   release:
+    name: Release
+    needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build-tauri
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get current version
+        id: get_version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          CURRENT="${{ steps.get_version.outputs.current }}"
+          # Split version into parts
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          # Increment patch version
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+          echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumping version from $CURRENT to $NEW_VERSION"
+
+      - name: Update version in package.json
+        run: |
+          npm version ${{ steps.bump_version.outputs.new }} --no-git-tag-version
+
+      - name: Update version in Cargo.toml
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ steps.bump_version.outputs.new }}"/' src-tauri/Cargo.toml
+
+      - name: Update version in tauri.conf.json
+        run: |
+          sed -i 's/"version": ".*"/"version": "${{ steps.bump_version.outputs.new }}"/' src-tauri/tauri.conf.json
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
+          git commit -m "chore: bump version to v${{ steps.bump_version.outputs.new }}"
+          git push
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Display structure of downloaded files
-        run: ls -R artifacts
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+
+          # Find and copy all release binaries with better names
+          # Linux
+          find artifacts/binaries-x86_64-unknown-linux-gnu -name "*.deb" -exec cp {} release-assets/ \; 2>/dev/null || true
+          find artifacts/binaries-x86_64-unknown-linux-gnu -name "*.AppImage" -exec cp {} release-assets/ \; 2>/dev/null || true
+          find artifacts/binaries-x86_64-unknown-linux-gnu -name "*.rpm" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          # macOS Intel
+          find artifacts/binaries-x86_64-apple-darwin -name "*.dmg" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          # macOS Apple Silicon
+          find artifacts/binaries-aarch64-apple-darwin -name "*.dmg" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          # Windows
+          find artifacts/binaries-x86_64-pc-windows-msvc -name "*.msi" -exec cp {} release-assets/ \; 2>/dev/null || true
+          find artifacts/binaries-x86_64-pc-windows-msvc -name "*.exe" -exec cp {} release-assets/ \; 2>/dev/null || true
+
+          echo "Release assets:"
+          ls -la release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.bump_version.outputs.new }}
+          name: v${{ steps.bump_version.outputs.new }}
+          body: |
+            ## Duplicate File Detector v${{ steps.bump_version.outputs.new }}
+
+            ### Downloads
+
+            | Platform | Download |
+            |----------|----------|
+            | Windows | `.msi` installer |
+            | macOS (Apple Silicon) | `.dmg` for M1/M2/M3 |
+            | macOS (Intel) | `.dmg` for Intel |
+            | Linux | `.deb`, `.AppImage`, or `.rpm` |
+
+            ### What's Changed
+
+            See [commit history](https://github.com/${{ github.repository }}/commits/main) for details.
+          files: release-assets/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
