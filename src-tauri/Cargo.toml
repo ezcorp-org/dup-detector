@@ -2,7 +2,8 @@
 name = "duplicate-file-detector"
 version = "0.1.0"
 description = "A fast, efficient desktop app for detecting and removing duplicate files"
-authors = ["Duplicate File Detector Team"]
+authors = ["Duplicate File Detector Contributors"]
+license = "MIT"
 edition = "2021"
 
 [lib]
