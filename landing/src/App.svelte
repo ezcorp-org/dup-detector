@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  // GitHub repo config - update this when you create the repo
-  const GITHUB_OWNER = 'user';  // TODO: Update with actual GitHub username
+  // GitHub repo config
+  const GITHUB_OWNER = 'ezcorp-org';
   const GITHUB_REPO = 'dup-detector';
 
   // Mouse spotlight
