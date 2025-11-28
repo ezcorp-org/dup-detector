@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "A fast, efficient desktop app for detecting and removing duplicate files",
   "author": "Duplicate File Detector Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ezcorp-org/dup-detector.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ezcorp-org/dup-detector/issues"
+  },
+  "homepage": "https://github.com/ezcorp-org/dup-detector#readme",
   "keywords": [
     "duplicate",
     "files",

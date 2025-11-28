@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "A fast, efficient desktop app for detecting and removing duplicate files"
 authors = ["Duplicate File Detector Contributors"]
 license = "MIT"
+repository = "https://github.com/ezcorp-org/dup-detector"
+homepage = "https://github.com/ezcorp-org/dup-detector"
 edition = "2021"
 
 [lib]
