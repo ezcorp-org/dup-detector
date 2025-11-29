@@ -32,27 +32,7 @@
   <header>
     <div class="header-content">
       <div class="logo">
-        <svg viewBox="0 0 32 32" fill="none" class="logo-icon">
-          <defs>
-            <linearGradient id="header-bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#c084fc"/>
-              <stop offset="50%" style="stop-color:#a855f7"/>
-              <stop offset="100%" style="stop-color:#7c3aed"/>
-            </linearGradient>
-          </defs>
-          <rect x="0" y="0" width="32" height="32" rx="6" fill="url(#header-bg-gradient)"/>
-          <g opacity="0.6">
-            <path d="M7 7h8l4 4v10a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 017 21V8.5A1.5 1.5 0 018.5 7z" fill="#ffffff"/>
-            <path d="M15 7v3a1 1 0 001 1h3" fill="#ffffff" opacity="0.8"/>
-          </g>
-          <g>
-            <path d="M12 10h8l4 4v10a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 0112 24V11.5a1.5 1.5 0 011.5-1.5z" fill="#ffffff"/>
-            <path d="M20 10v3a1 1 0 001 1h3" fill="#ffffff" opacity="0.7"/>
-            <rect x="14" y="17" width="7" height="1" rx="0.5" fill="#a855f7" opacity="0.4"/>
-            <rect x="14" y="19.5" width="5" height="1" rx="0.5" fill="#a855f7" opacity="0.4"/>
-            <rect x="14" y="22" width="6" height="1" rx="0.5" fill="#a855f7" opacity="0.4"/>
-          </g>
-        </svg>
+<img src="/favicon.svg" alt="Dup Detector" class="logo-icon" />
         <div class="logo-text">
           <h1>Dup Detector</h1>
           <p class="subtitle">Find and remove duplicate files</p>
