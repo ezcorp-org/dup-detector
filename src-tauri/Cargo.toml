@@ -1,6 +1,6 @@
 [package]
 name = "duplicate-file-detector"
-version = "0.1.0"
+version = "0.1.1"
 description = "A fast, efficient desktop app for detecting and removing duplicate files"
 authors = ["Duplicate File Detector Contributors"]
 license = "MIT"
