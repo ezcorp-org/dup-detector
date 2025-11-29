@@ -130,10 +130,7 @@ fn process_entry(
 
     // Get file metadata
     let metadata = entry.metadata().map_err(|e| {
-        ScannerError::Io(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            e.to_string(),
-        ))
+        ScannerError::Io(std::io::Error::other(e.to_string()))
     })?;
 
     let size = metadata.len();
@@ -148,7 +145,7 @@ fn process_entry(
     let modified = metadata
         .modified()
         .ok()
-        .and_then(|t| format_system_time(t));
+        .and_then(format_system_time);
 
     let file_entry = FileEntry::new(
         path.display().to_string(),

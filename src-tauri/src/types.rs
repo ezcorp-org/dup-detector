@@ -6,7 +6,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Options for configuring a duplicate scan operation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanOptions {
     /// Root directories to scan for duplicates.
@@ -30,18 +30,6 @@ pub struct ScanOptions {
     /// Default is false to avoid infinite loops.
     #[serde(default)]
     pub follow_symlinks: bool,
-}
-
-impl Default for ScanOptions {
-    fn default() -> Self {
-        Self {
-            root_paths: Vec::new(),
-            min_file_size: None,
-            include_extensions: None,
-            exclude_extensions: None,
-            follow_symlinks: false,
-        }
-    }
 }
 
 /// Represents a single file entry with its metadata.

@@ -148,7 +148,7 @@ impl From<ScannerError> for ErrorResponse {
 impl From<ScannerError> for String {
     fn from(err: ScannerError) -> Self {
         let response = ErrorResponse::from(err);
-        serde_json::to_string(&response).unwrap_or_else(|_| response.message)
+        serde_json::to_string(&response).unwrap_or(response.message)
     }
 }
 
