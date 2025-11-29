@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="180" fill="#0c0a14"/>
+
+  <!-- Back document (slightly transparent) -->
+  <g opacity="0.5">
+    <path d="M280 140h256l192 192v460a64 64 0 01-64 64H280a64 64 0 01-64-64V204a64 64 0 0164-64z" fill="#8b5cf6"/>
+    <path d="M536 140v128a64 64 0 0064 64h128" fill="#a78bfa"/>
+  </g>
+
+  <!-- Front document -->
+  <g>
+    <path d="M408 232h256l192 192v396a64 64 0 01-64 64H408a64 64 0 01-64-64V296a64 64 0 0164-64z" fill="#8b5cf6"/>
+    <path d="M664 232v128a64 64 0 0064 64h128" fill="#a78bfa"/>
+
+    <!-- Document lines -->
+    <rect x="440" y="560" width="280" height="40" rx="20" fill="#0c0a14" opacity="0.3"/>
+    <rect x="440" y="640" width="220" height="40" rx="20" fill="#0c0a14" opacity="0.3"/>
+    <rect x="440" y="720" width="160" height="40" rx="20" fill="#0c0a14" opacity="0.3"/>
+  </g>
+</svg>
