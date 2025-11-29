@@ -28,7 +28,83 @@
   let emailSubmitted = $state(false);
   let emailError = $state('');
   let showDownloadModal = $state(false);
+  let userOS = $state<OS>('unknown');
 
+  function detectOS(): OS {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes('mac')) return 'mac';
+    if (userAgent.includes('win')) return 'windows';
+    if (userAgent.includes('linux')) return 'linux';
+    return 'unknown';
+  }
+
+  function getAssetDisplayName(asset: ReleaseAsset): string {
+    const name = asset.name.toLowerCase();
+
+    // macOS variants
+    if (name.includes('aarch64') || name.includes('arm64') || name.includes('apple-silicon')) {
+      return 'Apple Silicon';
+    }
+    if (name.includes('x86_64') && (name.includes('darwin') || name.includes('macos') || name.includes('apple'))) {
+      return 'Intel';
+    }
+    if (name.includes('universal') && (name.includes('darwin') || name.includes('macos'))) {
+      return 'Universal';
+    }
+    if (name.endsWith('.dmg')) {
+      return 'DMG Installer';
+    }
+
+    // Windows variants
+    if (name.includes('x64') || name.includes('x86_64') || name.includes('win64')) {
+      if (name.endsWith('.msi')) return '64-bit (MSI)';
+      if (name.endsWith('.exe')) return '64-bit (EXE)';
+      return '64-bit';
+    }
+    if (name.includes('x86') || name.includes('win32') || name.includes('i686')) {
+      if (name.endsWith('.msi')) return '32-bit (MSI)';
+      if (name.endsWith('.exe')) return '32-bit (EXE)';
+      return '32-bit';
+    }
+    if (name.includes('arm64') && name.includes('windows')) {
+      return 'ARM64';
+    }
+    if (name.endsWith('.msi')) {
+      return 'MSI Installer';
+    }
+    if (name.endsWith('.exe')) {
+      return 'EXE Installer';
+    }
+
+    // Linux variants
+    if (name.endsWith('.deb')) {
+      if (name.includes('aarch64') || name.includes('arm64')) return 'Debian/Ubuntu (ARM64)';
+      return 'Debian/Ubuntu';
+    }
+    if (name.endsWith('.rpm')) {
+      if (name.includes('aarch64') || name.includes('arm64')) return 'Fedora/RHEL (ARM64)';
+      return 'Fedora/RHEL';
+    }
+    if (name.endsWith('.appimage')) {
+      if (name.includes('aarch64') || name.includes('arm64')) return 'AppImage (ARM64)';
+      return 'AppImage';
+    }
+    if (name.includes('.tar.gz') || name.includes('.tar.xz')) {
+      if (name.includes('aarch64') || name.includes('arm64')) return 'Tarball (ARM64)';
+      return 'Tarball';
+    }
+
+    // Fallback: use file extension
+    const ext = asset.name.split('.').pop()?.toUpperCase();
+    return ext || asset.name;
+  }
+
+  function getOrderedOSList(): OS[] {
+    const allOS: OS[] = ['mac', 'windows', 'linux'];
+    if (userOS === 'unknown') return allOS;
+    // Put user's OS first
+    return [userOS, ...allOS.filter(os => os !== userOS)];
+  }
 
   async function fetchLatestRelease() {
     try {
@@ -136,6 +212,7 @@
   ];
 
   onMount(() => {
+    userOS = detectOS();
     fetchLatestRelease();
   });
 </script>
@@ -607,89 +684,51 @@
               </a>
             </div>
           {:else}
-          <!-- macOS -->
-          {#if getAssetsForOS('mac').length > 0}
-            <div class="p-4 rounded-xl bg-bg-card border border-border hover:border-accent/30 transition-all">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-zinc-300" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                  </svg>
+            {#each getOrderedOSList() as os}
+              {#if getAssetsForOS(os).length > 0}
+                <div class="p-4 rounded-xl bg-bg-card border border-border hover:border-accent/30 transition-all {os === userOS ? 'ring-1 ring-accent/50' : ''}">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+                      {#if os === 'mac'}
+                        <svg class="w-6 h-6 text-zinc-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                        </svg>
+                      {:else if os === 'windows'}
+                        <svg class="w-6 h-6 text-zinc-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M3 12V6.75l6-1.32v6.48L3 12zm17-9v8.75l-10 .15V5.21L20 3zM3 13l6 .09v6.81l-6-1.15V13zm17 .25V22l-10-1.91V13.1l10 .15z"/>
+                        </svg>
+                      {:else}
+                        <svg class="w-6 h-6 text-zinc-300" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.117.799.504 1.545 1.189 2.113.761.631 1.635 1.146 2.52 1.586.885.44 1.76.841 2.438 1.227.678.386 1.086.727 1.204.908.212.323.168.577.168.844 0 .156-.019.314-.043.461-.024.146-.043.285-.043.413 0 .363.174.708.478.962.306.254.707.388 1.195.388.489 0 .889-.134 1.195-.388.305-.254.478-.599.478-.962 0-.128-.019-.267-.043-.413-.024-.147-.043-.305-.043-.461 0-.267-.044-.521.168-.844.118-.181.526-.522 1.204-.908.678-.386 1.553-.787 2.438-1.227.885-.44 1.759-.955 2.52-1.586.685-.568 1.072-1.314 1.189-2.113.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021z"/>
+                        </svg>
+                      {/if}
+                    </div>
+                    <div class="flex-1">
+                      <div class="font-medium text-white flex items-center gap-2">
+                        {#if os === 'mac'}macOS{:else if os === 'windows'}Windows{:else}Linux{/if}
+                        {#if os === userOS}
+                          <span class="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent font-medium">Detected</span>
+                        {/if}
+                      </div>
+                      <div class="text-xs text-zinc-500">
+                        {#if os === 'mac'}Apple Silicon & Intel{:else if os === 'windows'}Windows 10 & 11{:else}Debian, Ubuntu, Fedora & more{/if}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    {#each getAssetsForOS(os) as asset}
+                      <a
+                        href={asset.browser_download_url}
+                        class="px-3 py-1.5 bg-bg-elevated hover:bg-accent/20 border border-border hover:border-accent/30 rounded-lg text-xs text-zinc-300 hover:text-white transition-all"
+                      >
+                        {getAssetDisplayName(asset)}
+                        <span class="text-zinc-600 ml-1">({formatSize(asset.size)})</span>
+                      </a>
+                    {/each}
+                  </div>
                 </div>
-                <div>
-                  <div class="font-medium text-white">macOS</div>
-                  <div class="text-xs text-zinc-500">Apple Silicon & Intel</div>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                {#each getAssetsForOS('mac') as asset}
-                  <a
-                    href={asset.browser_download_url}
-                    class="px-3 py-1.5 bg-bg-elevated hover:bg-accent/20 border border-border hover:border-accent/30 rounded-lg text-xs text-zinc-300 hover:text-white transition-all"
-                  >
-                    {asset.name.split('-').pop() || asset.name}
-                    <span class="text-zinc-600 ml-1">({formatSize(asset.size)})</span>
-                  </a>
-                {/each}
-              </div>
-            </div>
-          {/if}
-
-          <!-- Windows -->
-          {#if getAssetsForOS('windows').length > 0}
-            <div class="p-4 rounded-xl bg-bg-card border border-border hover:border-accent/30 transition-all">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-zinc-300" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 12V6.75l6-1.32v6.48L3 12zm17-9v8.75l-10 .15V5.21L20 3zM3 13l6 .09v6.81l-6-1.15V13zm17 .25V22l-10-1.91V13.1l10 .15z"/>
-                  </svg>
-                </div>
-                <div>
-                  <div class="font-medium text-white">Windows</div>
-                  <div class="text-xs text-zinc-500">Windows 10 & 11</div>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                {#each getAssetsForOS('windows') as asset}
-                  <a
-                    href={asset.browser_download_url}
-                    class="px-3 py-1.5 bg-bg-elevated hover:bg-accent/20 border border-border hover:border-accent/30 rounded-lg text-xs text-zinc-300 hover:text-white transition-all"
-                  >
-                    {asset.name.split('-').pop() || asset.name}
-                    <span class="text-zinc-600 ml-1">({formatSize(asset.size)})</span>
-                  </a>
-                {/each}
-              </div>
-            </div>
-          {/if}
-
-          <!-- Linux -->
-          {#if getAssetsForOS('linux').length > 0}
-            <div class="p-4 rounded-xl bg-bg-card border border-border hover:border-accent/30 transition-all">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-zinc-300" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.117.799.504 1.545 1.189 2.113.761.631 1.635 1.146 2.52 1.586.885.44 1.76.841 2.438 1.227.678.386 1.086.727 1.204.908.212.323.168.577.168.844 0 .156-.019.314-.043.461-.024.146-.043.285-.043.413 0 .363.174.708.478.962.306.254.707.388 1.195.388.489 0 .889-.134 1.195-.388.305-.254.478-.599.478-.962 0-.128-.019-.267-.043-.413-.024-.147-.043-.305-.043-.461 0-.267-.044-.521.168-.844.118-.181.526-.522 1.204-.908.678-.386 1.553-.787 2.438-1.227.885-.44 1.759-.955 2.52-1.586.685-.568 1.072-1.314 1.189-2.113.123-.805-.009-1.657-.287-2.489-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021z"/>
-                  </svg>
-                </div>
-                <div>
-                  <div class="font-medium text-white">Linux</div>
-                  <div class="text-xs text-zinc-500">Debian, Ubuntu, Fedora & more</div>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                {#each getAssetsForOS('linux') as asset}
-                  <a
-                    href={asset.browser_download_url}
-                    class="px-3 py-1.5 bg-bg-elevated hover:bg-accent/20 border border-border hover:border-accent/30 rounded-lg text-xs text-zinc-300 hover:text-white transition-all"
-                  >
-                    {asset.name.split('-').pop() || asset.name}
-                    <span class="text-zinc-600 ml-1">({formatSize(asset.size)})</span>
-                  </a>
-                {/each}
-              </div>
-            </div>
-          {/if}
+              {/if}
+            {/each}
           {/if}
         </div>
 
