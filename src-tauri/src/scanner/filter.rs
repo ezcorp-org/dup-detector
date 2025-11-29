@@ -157,8 +157,8 @@ mod tests {
 
     #[test]
     fn test_include_extensions() {
-        let filter = FileFilter::new()
-            .with_include_extensions(vec!["jpg".to_string(), "png".to_string()]);
+        let filter =
+            FileFilter::new().with_include_extensions(vec!["jpg".to_string(), "png".to_string()]);
 
         assert!(filter.matches(&PathBuf::from("/test/photo.jpg"), 100));
         assert!(filter.matches(&PathBuf::from("/test/photo.JPG"), 100)); // Case insensitive
@@ -169,8 +169,8 @@ mod tests {
 
     #[test]
     fn test_include_extensions_with_dot() {
-        let filter = FileFilter::new()
-            .with_include_extensions(vec![".jpg".to_string(), ".png".to_string()]);
+        let filter =
+            FileFilter::new().with_include_extensions(vec![".jpg".to_string(), ".png".to_string()]);
 
         // Should work the same - dots are stripped
         assert!(filter.matches(&PathBuf::from("/test/photo.jpg"), 100));
@@ -179,8 +179,8 @@ mod tests {
 
     #[test]
     fn test_exclude_extensions() {
-        let filter = FileFilter::new()
-            .with_exclude_extensions(vec!["tmp".to_string(), "bak".to_string()]);
+        let filter =
+            FileFilter::new().with_exclude_extensions(vec!["tmp".to_string(), "bak".to_string()]);
 
         assert!(filter.matches(&PathBuf::from("/test/file.txt"), 100));
         assert!(filter.matches(&PathBuf::from("/test/file.jpg"), 100));
@@ -222,8 +222,7 @@ mod tests {
 
     #[test]
     fn test_file_without_extension() {
-        let filter = FileFilter::new()
-            .with_include_extensions(vec!["txt".to_string()]);
+        let filter = FileFilter::new().with_include_extensions(vec!["txt".to_string()]);
 
         assert!(!filter.matches(&PathBuf::from("/test/README"), 100));
         assert!(filter.matches(&PathBuf::from("/test/README.txt"), 100));
@@ -248,12 +247,10 @@ mod tests {
         let size_filter = FileFilter::new().with_min_size(100);
         assert!(size_filter.has_restrictions());
 
-        let include_filter = FileFilter::new()
-            .with_include_extensions(vec!["txt".to_string()]);
+        let include_filter = FileFilter::new().with_include_extensions(vec!["txt".to_string()]);
         assert!(include_filter.has_restrictions());
 
-        let exclude_filter = FileFilter::new()
-            .with_exclude_extensions(vec!["tmp".to_string()]);
+        let exclude_filter = FileFilter::new().with_exclude_extensions(vec!["tmp".to_string()]);
         assert!(exclude_filter.has_restrictions());
     }
 
@@ -265,8 +262,7 @@ mod tests {
 
     #[test]
     fn test_multiple_dots_in_filename() {
-        let filter = FileFilter::new()
-            .with_include_extensions(vec!["gz".to_string()]);
+        let filter = FileFilter::new().with_include_extensions(vec!["gz".to_string()]);
 
         assert!(filter.matches(&PathBuf::from("/test/archive.tar.gz"), 100));
         assert!(!filter.matches(&PathBuf::from("/test/archive.tar"), 100));

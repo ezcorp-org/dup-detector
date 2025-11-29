@@ -50,7 +50,11 @@ pub struct FileEntry {
 impl FileEntry {
     /// Creates a new FileEntry with the given path, size, and modification time.
     pub fn new(path: String, size: u64, modified: Option<String>) -> Self {
-        Self { path, size, modified }
+        Self {
+            path,
+            size,
+            modified,
+        }
     }
 }
 
@@ -180,15 +184,10 @@ impl ScanResult {
         errors: Vec<ScanError>,
         duration_ms: u64,
     ) -> Self {
-        let total_duplicates_found: u64 = duplicate_groups
-            .iter()
-            .map(|g| g.files.len() as u64)
-            .sum();
+        let total_duplicates_found: u64 =
+            duplicate_groups.iter().map(|g| g.files.len() as u64).sum();
 
-        let total_wasted_space: u64 = duplicate_groups
-            .iter()
-            .map(|g| g.wasted_space())
-            .sum();
+        let total_wasted_space: u64 = duplicate_groups.iter().map(|g| g.wasted_space()).sum();
 
         Self {
             duplicate_groups,
@@ -387,8 +386,8 @@ mod tests {
 
     #[test]
     fn test_scan_progress_with_message() {
-        let progress = ScanProgress::new(10, None, ScanPhase::Counting)
-            .with_message("Scanning directory...");
+        let progress =
+            ScanProgress::new(10, None, ScanPhase::Counting).with_message("Scanning directory...");
 
         assert_eq!(progress.message, Some("Scanning directory...".to_string()));
     }
@@ -463,10 +462,7 @@ mod tests {
 
     #[test]
     fn test_delete_result_all_succeeded() {
-        let result = DeleteResult::new(
-            vec!["/file1.txt".to_string()],
-            vec![],
-        );
+        let result = DeleteResult::new(vec!["/file1.txt".to_string()], vec![]);
 
         assert!(result.all_succeeded());
     }
