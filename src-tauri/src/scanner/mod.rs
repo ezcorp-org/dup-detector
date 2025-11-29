@@ -57,11 +57,7 @@ impl Default for ScanOutput {
 /// # Returns
 /// A ScanOutput containing matching files and any errors encountered.
 pub fn scan_directories(options: &ScanOptions) -> ScannerResult<ScanOutput> {
-    let paths: Vec<PathBuf> = options
-        .root_paths
-        .iter()
-        .map(PathBuf::from)
-        .collect();
+    let paths: Vec<PathBuf> = options.root_paths.iter().map(PathBuf::from).collect();
 
     // Validate paths exist
     for path in &paths {
@@ -95,9 +91,7 @@ fn scan_directory(
     filter: &FileFilter,
     output: &mut ScanOutput,
 ) {
-    let walker = WalkDir::new(root)
-        .follow_links(follow_symlinks)
-        .into_iter();
+    let walker = WalkDir::new(root).follow_links(follow_symlinks).into_iter();
 
     for entry_result in walker {
         match entry_result {
@@ -109,7 +103,10 @@ fn scan_directory(
             }
             Err(e) => {
                 // WalkDir error - permission denied, symlink loop, etc.
-                let path = e.path().map(|p| p.display().to_string()).unwrap_or_default();
+                let path = e
+                    .path()
+                    .map(|p| p.display().to_string())
+                    .unwrap_or_default();
                 let message = e.to_string();
                 output.add_error(ScanError::new(path, message));
             }
@@ -129,9 +126,9 @@ fn process_entry(
     }
 
     // Get file metadata
-    let metadata = entry.metadata().map_err(|e| {
-        ScannerError::Io(std::io::Error::other(e.to_string()))
-    })?;
+    let metadata = entry
+        .metadata()
+        .map_err(|e| ScannerError::Io(std::io::Error::other(e.to_string())))?;
 
     let size = metadata.len();
     let path = entry.path();
@@ -142,16 +139,9 @@ fn process_entry(
     }
 
     // Get modification time
-    let modified = metadata
-        .modified()
-        .ok()
-        .and_then(format_system_time);
+    let modified = metadata.modified().ok().and_then(format_system_time);
 
-    let file_entry = FileEntry::new(
-        path.display().to_string(),
-        size,
-        modified,
-    );
+    let file_entry = FileEntry::new(path.display().to_string(), size, modified);
 
     output.add_file(file_entry);
     Ok(())
@@ -178,14 +168,12 @@ fn build_filter(options: &ScanOptions) -> FileFilter {
 
 /// Formats a SystemTime as an ISO 8601 string.
 fn format_system_time(time: SystemTime) -> Option<String> {
-    time.duration_since(SystemTime::UNIX_EPOCH)
-        .ok()
-        .map(|d| {
-            // Simple ISO 8601 format
-            let secs = d.as_secs();
-            // This is a simplified format - in production you might use chrono
-            format!("{}", secs)
-        })
+    time.duration_since(SystemTime::UNIX_EPOCH).ok().map(|d| {
+        // Simple ISO 8601 format
+        let secs = d.as_secs();
+        // This is a simplified format - in production you might use chrono
+        format!("{}", secs)
+    })
 }
 
 /// Groups files by their size.
@@ -225,9 +213,9 @@ pub fn count_files_in_groups(groups: &HashMap<u64, Vec<FileEntry>>) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
     use std::fs::{self, File};
     use std::io::Write;
+    use tempfile::TempDir;
 
     fn create_test_file(dir: &Path, name: &str, content: &[u8]) -> PathBuf {
         let path = dir.join(name);
@@ -371,15 +359,21 @@ mod tests {
     #[test]
     fn test_count_files_in_groups() {
         let mut groups = HashMap::new();
-        groups.insert(100, vec![
-            FileEntry::new("/a.txt".to_string(), 100, None),
-            FileEntry::new("/b.txt".to_string(), 100, None),
-        ]);
-        groups.insert(200, vec![
-            FileEntry::new("/c.txt".to_string(), 200, None),
-            FileEntry::new("/d.txt".to_string(), 200, None),
-            FileEntry::new("/e.txt".to_string(), 200, None),
-        ]);
+        groups.insert(
+            100,
+            vec![
+                FileEntry::new("/a.txt".to_string(), 100, None),
+                FileEntry::new("/b.txt".to_string(), 100, None),
+            ],
+        );
+        groups.insert(
+            200,
+            vec![
+                FileEntry::new("/c.txt".to_string(), 200, None),
+                FileEntry::new("/d.txt".to_string(), 200, None),
+                FileEntry::new("/e.txt".to_string(), 200, None),
+            ],
+        );
 
         assert_eq!(count_files_in_groups(&groups), 5);
     }

@@ -4,12 +4,13 @@
 
 use crate::duplicates::find_duplicates;
 use crate::error::ScannerError;
-use crate::hasher::{extract_hash_errors, extract_successful_hashes, hash_files_parallel_with_cancel};
+use crate::hasher::{
+    extract_hash_errors, extract_successful_hashes, hash_files_parallel_with_cancel,
+};
 use crate::scanner::{group_by_size, scan_directories};
 use crate::state::AppState;
 use crate::types::{
-    DeleteError, DeleteResult, ScanError, ScanOptions, ScanPhase, ScanProgress,
-    ScanResult,
+    DeleteError, DeleteResult, ScanError, ScanOptions, ScanPhase, ScanProgress, ScanResult,
 };
 use log::{debug, error, info, warn};
 use std::path::Path;
@@ -47,9 +48,9 @@ pub async fn start_scan(
     info!("Starting scan with {} root paths", options.root_paths.len());
 
     // Try to start the scan
-    let scan_id = state.try_start_scan().ok_or_else(|| {
-        String::from(ScannerError::ScanInProgress)
-    })?;
+    let scan_id = state
+        .try_start_scan()
+        .ok_or_else(|| String::from(ScannerError::ScanInProgress))?;
 
     debug!("Scan started with ID: {}", scan_id);
 
@@ -90,7 +91,13 @@ pub async fn start_scan(
     info!("Found {} files in scan", total_files);
 
     // Phase 2: Group by size
-    emit_progress(&app_handle, total_files, Some(total_files), ScanPhase::Grouping, None);
+    emit_progress(
+        &app_handle,
+        total_files,
+        Some(total_files),
+        ScanPhase::Grouping,
+        None,
+    );
 
     let size_groups = group_by_size(scan_output.files);
     let files_to_hash: Vec<_> = size_groups.into_values().flatten().collect();
@@ -174,7 +181,9 @@ pub async fn start_scan(
 
     info!(
         "Scan complete in {}ms: {} duplicate groups, {} wasted bytes",
-        duration_ms, result.duplicate_groups.len(), result.total_wasted_space
+        duration_ms,
+        result.duplicate_groups.len(),
+        result.total_wasted_space
     );
 
     // Emit completion
@@ -210,7 +219,10 @@ pub fn cancel_scan(state: State<'_, AppState>) -> Result<(), String> {
 /// * `file_paths` - List of file paths to delete
 /// * `use_trash` - If true, move to trash/recycle bin; otherwise permanently delete
 #[tauri::command]
-pub async fn delete_files(file_paths: Vec<String>, use_trash: bool) -> Result<DeleteResult, String> {
+pub async fn delete_files(
+    file_paths: Vec<String>,
+    use_trash: bool,
+) -> Result<DeleteResult, String> {
     info!(
         "Delete requested for {} files (use_trash: {})",
         file_paths.len(),
@@ -267,10 +279,7 @@ pub async fn select_folders(app_handle: AppHandle) -> Result<Vec<String>, String
 
     match rx.await {
         Ok(Some(paths)) => {
-            let path_strings: Vec<String> = paths
-                .into_iter()
-                .map(|p| p.to_string())
-                .collect();
+            let path_strings: Vec<String> = paths.into_iter().map(|p| p.to_string()).collect();
 
             info!("Selected {} folders", path_strings.len());
             Ok(path_strings)
@@ -279,9 +288,7 @@ pub async fn select_folders(app_handle: AppHandle) -> Result<Vec<String>, String
             debug!("Folder selection cancelled");
             Ok(Vec::new())
         }
-        Err(_) => {
-            Err("Dialog channel closed unexpectedly".to_string())
-        }
+        Err(_) => Err("Dialog channel closed unexpectedly".to_string()),
     }
 }
 

@@ -210,8 +210,7 @@ mod tests {
 
     #[test]
     fn test_error_response_with_path() {
-        let response = ErrorResponse::new("ERROR", "Message")
-            .with_path("/some/path");
+        let response = ErrorResponse::new("ERROR", "Message").with_path("/some/path");
 
         assert_eq!(response.path, Some("/some/path".to_string()));
     }
