@@ -33,7 +33,7 @@ pub fn find_duplicates(files_with_hashes: Vec<(FileEntry, String)>) -> Vec<Dupli
         .collect();
 
     // Sort by wasted space (descending) to show biggest savings first
-    groups.sort_by(|a, b| b.wasted_space().cmp(&a.wasted_space()));
+    groups.sort_by_key(|g| std::cmp::Reverse(g.wasted_space()));
 
     debug!(
         "Found {} duplicate groups with {} total files",
