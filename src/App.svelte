@@ -104,15 +104,21 @@
   </section>
 
   <footer>
-    <span class="status">{statusText}</span>
-    {#if $scanStore.status === 'finished'}
-      <span class="stats">
-        {pluralize($scanStore.totalFilesScanned, 'file')} scanned
-        {#if $scanStore.duplicateGroups.length > 0}
-          &middot; {pluralize($scanStore.duplicateGroups.length, 'duplicate group')}
-        {/if}
-      </span>
-    {/if}
+    <div class="footer-status">
+      <span class="status">{statusText}</span>
+      {#if $scanStore.status === 'finished'}
+        <span class="stats">
+          {pluralize($scanStore.totalFilesScanned, 'file')} scanned
+          {#if $scanStore.duplicateGroups.length > 0}
+            &middot; {pluralize($scanStore.duplicateGroups.length, 'duplicate group')}
+          {/if}
+        </span>
+      {/if}
+    </div>
+    <div class="footer-brand">
+      <span class="copyright">&copy; 2025 <a href="https://ezcorp.org" target="_blank" rel="noopener noreferrer">EZCorp</a>. Privacy first. Always.</span>
+      <span class="tagline">Built with ❤️ for developers who value the EZ life.</span>
+    </div>
   </footer>
 </main>
 
@@ -271,6 +277,14 @@
     justify-content: space-between;
     align-items: center;
     font-size: 0.8125rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .footer-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   .status {
@@ -280,5 +294,40 @@
 
   .stats {
     color: var(--text-secondary);
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+
+  .footer-brand a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .footer-brand a:hover {
+    text-decoration: underline;
+  }
+
+  .tagline {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 700px) {
+    footer {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .footer-brand {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
   }
 </style>
